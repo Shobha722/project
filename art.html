@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Canvas & Hue | Art Booking</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #faf9f6;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+      color: #1a1a1a;
+      line-height: 1.4;
+      padding: 2rem 1.5rem;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    /* header area */
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid #e2dfd9;
+      padding-bottom: 1rem;
+    }
+
+    .brand h1 {
+      font-size: 1.9rem;
+      font-weight: 550;
+      letter-spacing: -0.3px;
+      background: linear-gradient(130deg, #2c2b28, #6b4e3a);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .brand p {
+      font-size: 0.85rem;
+      color: #8a7a6b;
+      margin-top: 6px;
+    }
+
+    .booking-summary {
+      background: #ffffffea;
+      backdrop-filter: blur(2px);
+      padding: 0.5rem 1.2rem;
+      border-radius: 100px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      border: 1px solid #e8e1d7;
+      display: flex;
+      gap: 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .booking-summary span:first-child {
+      color: #5a4a3a;
+    }
+
+    .booking-count {
+      background: #3c2c1f;
+      color: #fef3e8;
+      border-radius: 40px;
+      padding: 0.2rem 0.65rem;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    .total-badge {
+      color: #2f6b3a;
+      font-weight: 700;
+    }
+
+    /* gallery grid — clean cards */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1.8rem;
+      margin: 2.2rem 0 3rem;
+    }
+
+    .art-card {
+      background: #ffffff;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      transition: all 0.2s ease;
+      box-shadow: 0 5px 18px rgba(0, 0, 0, 0.03), 0 0 0 1px #ebe5dd;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .art-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 28px -12px rgba(0, 0, 0, 0.12), 0 0 0 1px #dfd4c8;
+    }
+
+    .art-image {
+      background: #f3ede5;
+      height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4.2rem;
+      border-bottom: 1px solid #f1eade;
+    }
+
+    .art-details {
+      padding: 1.2rem 1.2rem 1.4rem;
+      flex: 1;
+    }
+
+    .art-title {
+      font-size: 1.3rem;
+      font-weight: 590;
+      letter-spacing: -0.2px;
+      color: #1e1b17;
+    }
+
+    .artist-name {
+      font-size: 0.8rem;
+      color: #9b8774;
+      margin-top: 4px;
+      font-weight: 450;
+    }
+
+    .price-tag {
+      margin: 0.8rem 0 0.9rem;
+      font-size: 1.4rem;
+      font-weight: 630;
+      color: #2e5c34;
+    }
+
+    .price-tag small {
+      font-size: 0.8rem;
+      font-weight: normal;
+      color: #826e5c;
+    }
+
+    .book-btn {
+      background: #2b4426;
+      border: none;
+      width: 100%;
+      padding: 0.75rem 0;
+      border-radius: 3rem;
+      color: white;
+      font-weight: 550;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: inherit;
+    }
+
+    .book-btn:hover {
+      background: #1f351b;
+      transform: scale(0.98);
+    }
+
+    .book-btn:active {
+      background: #162813;
+    }
+
+    .book-btn.disabled-btn, .book-btn:disabled {
+      background: #cbbcaa;
+      cursor: default;
+      transform: none;
+      opacity: 0.7;
+    }
+
+    /* cart panel — clean & minimal */
+    .cart-panel {
+      background: #ffffff;
+      border-radius: 1.6rem;
+      border: 1px solid #eae2d8;
+      padding: 1.4rem 1.5rem 1.7rem;
+      margin: 1rem 0 1.8rem;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.02);
+    }
+
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+      border-bottom: 1px dashed #e4d9ce;
+      padding-bottom: 0.7rem;
+    }
+
+    .cart-header h2 {
+      font-size: 1.4rem;
+      font-weight: 530;
+      letter-spacing: -0.2px;
+    }
+
+    .clear-cart {
+      background: none;
+      border: none;
+      font-size: 0.8rem;
+      color: #a48d76;
+      cursor: pointer;
+      font-weight: 460;
+      transition: 0.1s;
+      padding: 0.2rem 0.6rem;
+      border-radius: 30px;
+    }
+
+    .clear-cart:hover {
+      color: #8b3c2c;
+      background: #faf3ec;
+    }
+
+    .cart-list {
+      max-height: 260px;
+      overflow-y: auto;
+      margin: 0.5rem 0 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fefbf7;
+      padding: 0.6rem 1rem;
+      border-radius: 60px;
+      border: 1px solid #eee4db;
+      flex-wrap: wrap;
+    }
+
+    .cart-item-left {
+      display: flex;
+      gap: 0.9rem;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+
+    .cart-item-title {
+      font-weight: 520;
+      font-size: 0.9rem;
+    }
+
+    .cart-item-price {
+      color: #2b6b37;
+      font-weight: 500;
+      font-size: 0.85rem;
+    }
+
+    .remove-item {
+      background: transparent;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: #bfa58b;
+      transition: 0.1s;
+      padding: 0 4px;
+    }
+
+    .remove-item:hover {
+      color: #c23b22;
+    }
+
+    .cart-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid #e9dfd4;
+    }
+
+    .total-price {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #2d4a2a;
+    }
+
+    .checkout-btn {
+      background: #4d5e3f;
+      border: none;
+      padding: 0.6rem 1.8rem;
+      border-radius: 40px;
+      color: white;
+      font-weight: 550;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.15s;
+      font-family: inherit;
+    }
+
+    .checkout-btn:hover {
+      background: #374d2f;
+      transform: scale(0.97);
+    }
+
+    .empty-msg {
+      text-align: center;
+      padding: 1.2rem 0;
+      color: #b9ab9b;
+      font-style: italic;
+      font-size: 0.85rem;
+    }
+
+    .toast-message {
+      position: fixed;
+      bottom: 1.8rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #24221fd9;
+      backdrop-filter: blur(8px);
+      color: #fef2e6;
+      padding: 0.6rem 1.5rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 460;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      opacity: 0;
+      z-index: 1000;
+      font-family: monospace;
+    }
+
+    footer {
+      margin-top: 2.8rem;
+      text-align: center;
+      font-size: 0.7rem;
+      color: #b6a692;
+      border-top: 1px solid #ebe2d8;
+      padding-top: 1.5rem;
+    }
+
+    @media (max-width: 650px) {
+      body {
+        padding: 1rem;
+      }
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="brand">
+      <h1>🎨 canvas & hue</h1>
+      <p>original art · book your piece</p>
+    </div>
+    <div class="booking-summary">
+      <span>📘 my collection</span>
+      <span class="booking-count" id="bookingCounter">0</span>
+      <span>💶 <span id="miniTotal">0</span> €</span>
+    </div>
+  </div>
+
+  <!-- ART GALLERY SECTION -->
+  <div class="gallery" id="galleryContainer"></div>
+
+  <!-- BOOKING / CART SECTION -->
+  <div class="cart-panel" id="cartPanel">
+    <div class="cart-header">
+      <h2>📋 reserved artworks</h2>
+      <button class="clear-cart" id="clearCartBtn">✖ clear all</button>
+    </div>
+    <div id="cartListContainer" class="cart-list">
+      <div class="empty-msg">✨ no artworks booked yet — choose your favorites above</div>
+    </div>
+    <div class="cart-footer">
+      <span class="total-price" id="totalCartPrice">0.00 €</span>
+      <button class="checkout-btn" id="checkoutBtn">✔ confirm booking</button>
+    </div>
+  </div>
+  <footer>simple online art booking • each original piece can be reserved once</footer>
+</div>
+<div id="toastMsg" class="toast-message">✨ added to booking</div>
+
+<script>
+  // ---------- ART DATABASE (minimal but expressive) ----------
+  const ARTWORKS = [
+    { id: 101, title: "Midnight Garden", artist: "Elena Voss", price: 295, emoji: "🌙🌸" },
+    { id: 102, title: "Concrete Waves", artist: "Marcus Lee", price: 380, emoji: "🌊🏙️" },
+    { id: 103, title: "Fireside Memory", artist: "Clara Rios", price: 470, emoji: "🔥🪵" },
+    { id: 104, title: "Silent Chromatics", artist: "Zoe Ahn", price: 250, emoji: "🔲🎨" },
+    { id: 105, title: "Olive Grove Dream", artist: "Luca Bianchi", price: 340, emoji: "🌿🫒" },
+    { id: 106, title: "Golden Hour", artist: "Naomi S.", price: 410, emoji: "🌇✨" }
+  ];
+
+  // ---------- state: bookedItems (each unique art can be booked once) ----------
+  let bookedArray = [];   // stores objects { id, title, artist, price, emoji }
+
+  // Helper: save to localStorage for persistence (simple static but keeps after refresh)
+  function persistBookings() {
+    localStorage.setItem("art_booking_data", JSON.stringify(bookedArray));
+  }
+
+  function loadFromStorage() {
+    const stored = localStorage.getItem("art_booking_data");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          bookedArray = parsed;
+        }
+      } catch(e) { bookedArray = []; }
+    } else {
+      bookedArray = [];
+    }
+  }
+
+  // -------- UI Helpers ----------
+  function showMessage(text, isError = false) {
+    const toast = document.getElementById("toastMsg");
+    toast.textContent = text;
+    toast.style.backgroundColor = isError ? "#9b3f2ad9" : "#24221fd9";
+    toast.style.opacity = "1";
+    setTimeout(() => {
+      toast.style.opacity = "0";
+    }, 2000);
+  }
+
+  // add to booking (prevent duplicates)
+  function addToBooking(artwork) {
+    const alreadyExists = bookedArray.some(item => item.id === artwork.id);
+    if (alreadyExists) {
+      showMessage(`⚠️ "${artwork.title}" is already in your booking`, true);
+      return false;
+    }
+    const bookingEntry = {
+      id: artwork.id,
+      title: artwork.title,
+      artist: artwork.artist,
+      price: artwork.price,
+      emoji: artwork.emoji
+    };
+    bookedArray.push(bookingEntry);
+    persistBookings();
+    showMessage(`➕ "${artwork.title}" added · total ${bookedArray.length} piece(s)`);
+    renderAll();
+    return true;
+  }
+
+  function removeBookingItem(artId) {
+    const index = bookedArray.findIndex(item => item.id === artId);
+    if (index === -1) return;
+    const removedTitle = bookedArray[index].title;
+    bookedArray.splice(index, 1);
+    persistBookings();
+    showMessage(`❌ removed “${removedTitle}” from booking`);
+    renderAll();
+  }
+
+  function clearAllBookings() {
+    if (bookedArray.length === 0) {
+      showMessage("📭 nothing to clear", false);
+      return;
+    }
+    bookedArray = [];
+    persistBookings();
+    showMessage("🧹 all artworks cleared");
+    renderAll();
+  }
+
+  function confirmBookingOrder() {
+    if (bookedArray.length === 0) {
+      showMessage("❗ cannot confirm — your booking list is empty", true);
+      return;
+    }
+    const totalCost = bookedArray.reduce((sum, art) => sum + art.price, 0);
+    const artNames = bookedArray.map(a => `“${a.title}”`).join(", ");
+    const confirmMsg = `🎉 BOOKING CONFIRMED (demo)\n\nYou've reserved ${bookedArray.length} piece(s):\n${artNames}\n\nTotal amount: ${totalCost} €\n\nThank you for supporting artists! A confirmation will be sent.`;
+    const userDecision = confirm(confirmMsg + "\n\n✅ Press OK to clear your cart and start fresh? (Cancel keeps your list)");
+    if (userDecision) {
+      bookedArray = [];
+      persistBookings();
+      showMessage("✨ Booking completed! Your cart is now empty.");
+      renderAll();
+    } else {
+      showMessage("📌 booking confirmed, cart remains as is", false);
+      renderAll();  // refresh just in case
+    }
+  }
+
+  // ------------- RENDER GALLERY -------------
+  function renderGallery() {
+    const galleryEl = document.getElementById("galleryContainer");
+    if (!galleryEl) return;
+    galleryEl.innerHTML = "";
+    ARTWORKS.forEach(art => {
+      const isBooked = bookedArray.some(b => b.id === art.id);
+      const card = document.createElement("div");
+      card.className = "art-card";
+      card.innerHTML = `
+        <div class="art-image">
+          <span style="font-size: 3.8rem;">${art.emoji}</span>
+        </div>
+        <div class="art-details">
+          <div class="art-title">${escapeHtml(art.title)}</div>
+          <div class="artist-name">${escapeHtml(art.artist)}</div>
+          <div class="price-tag">${art.price} <small>€</small></div>
+          <button class="book-btn" data-id="${art.id}" ${isBooked ? 'disabled' : ''}>
+            ${isBooked ? '✓ already booked' : '📖 book now'}
+          </button>
+        </div>
+      `;
+      const btn = card.querySelector(".book-btn");
+      if (btn && !isBooked) {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          addToBooking(art);
+        });
+      }
+      galleryEl.appendChild(card);
+    });
+  }
+
+  // Helper: simple escaping
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  // render cart list and totals
+  function renderCart() {
+    const cartContainer = document.getElementById("cartListContainer");
+    const totalSpan = document.getElementById("totalCartPrice");
+    const bookingCounterSpan = document.getElementById("bookingCounter");
+    const miniTotalSpan = document.getElementById("miniTotal");
+
+    if (!cartContainer) return;
+
+    if (bookedArray.length === 0) {
+      cartContainer.innerHTML = `<div class="empty-msg">✨ no artworks booked yet — choose your favorites above</div>`;
+      if (totalSpan) totalSpan.innerText = "0.00 €";
+      if (bookingCounterSpan) bookingCounterSpan.innerText = "0";
+      if (miniTotalSpan) miniTotalSpan.innerText = "0";
+      return;
+    }
+
+    let total = 0;
+    let cartHtml = "";
+    bookedArray.forEach(item => {
+      total += item.price;
+      cartHtml += `
+        <div class="cart-item" data-item-id="${item.id}">
+          <div class="cart-item-left">
+            <span class="cart-item-title">🎨 ${escapeHtml(item.title)}</span>
+            <span class="cart-item-price">${item.price} €</span>
+            <span style="font-size:0.7rem; color:#a58d76;">by ${escapeHtml(item.artist)}</span>
+          </div>
+          <button class="remove-item" data-id="${item.id}" aria-label="remove">✕</button>
+        </div>
+      `;
+    });
+
+    cartContainer.innerHTML = cartHtml;
+    if (totalSpan) totalSpan.innerText = `${total.toFixed(2)} €`;
+    if (bookingCounterSpan) bookingCounterSpan.innerText = bookedArray.length;
+    if (miniTotalSpan) miniTotalSpan.innerText = total;
+
+    // attach remove event to each remove button
+    document.querySelectorAll(".remove-item").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const idAttr = btn.getAttribute("data-id");
+        if (idAttr) removeBookingItem(parseInt(idAttr));
+      });
+    });
+  }
+
+  function renderAll() {
+    renderGallery();
+    renderCart();
+  }
+
+  // ------------- BIND GLOBAL UI ACTIONS -------------
+  function bindActions() {
+    const clearBtn = document.getElementById("clearCartBtn");
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => clearAllBookings());
+    }
+    const checkoutBtn = document.getElementById("checkoutBtn");
+    if (checkoutBtn) {
+      checkoutBtn.addEventListener("click", () => confirmBookingOrder());
+    }
+  }
+
+  // ------------- INITIALIZE -------------
+  function init() {
+    loadFromStorage();
+    bindActions();
+    renderAll();
+  }
+
+  init();
+</script>
+</body>
+</html>
